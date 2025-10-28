@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestor de Tareas - Besimplit</title>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .fade-in {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .slide-in {
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(-10px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen font-sans">
+    {% block content %}
+    {% endblock %}
+    
+    <script>
+        function toggleFormularioEdicion(tareaId) {
+            const formulario = document.getElementById(`formulario-edicion-${tareaId}`);
+            const tarjetaTarea = document.getElementById(`tarea-${tareaId}`);
+            
+            if (formulario.style.display === 'none') {
+                formulario.style.display = 'block';
+                tarjetaTarea.style.display = 'none';
+            } else {
+                formulario.style.display = 'none';
+                tarjetaTarea.style.display = 'block';
+            }
+        }
+        function confirmarEliminacion(tareaId) {
+            if (confirm('¿Estás seguro de que quieres eliminar esta tarea? Esta acción no se puede deshacer.')) {
+                htmx.ajax('DELETE', `/tareas/${tareaId}/eliminar/`, {
+                    swap: 'none',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    }
+                }).then(() => {
+                    const elemento = document.getElementById(`tarea-${tareaId}`);
+                    if (elemento) {
+                        elemento.style.opacity = '0';
+                        elemento.style.transform = 'translateX(-100px)';
+                        setTimeout(() => elemento.remove(), 300);
+                    }
+                });
+            }
+        }  
+        function actualizarEstadisticas() {
+            htmx.ajax('GET', '/tareas/estadisticas/', {
+                swap: 'none'
+            }).then(response => response.json()).then(data => {
+                const estadisticasElement = document.getElementById('estadisticas');
+                if (estadisticasElement) {
+                    estadisticasElement.innerHTML = `
+                        <div class="grid grid-cols-3 gap-4 text-center">
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="text-2xl font-bold text-blue-600">${data.total}</div>
+                                <div class="text-sm text-gray-600">Total</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="text-2xl font-bold text-green-600">${data.completadas}</div>
+                                <div class="text-sm text-gray-600">Completadas</div>
+                            </div>
+                            <div class="bg-white p-3 rounded-lg shadow-sm">
+                                <div class="text-2xl font-bold text-orange-600">${data.pendientes}</div>
+                                <div class="text-sm text-gray-600">Pendientes</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+        }
+        document.addEventListener('DOMContentLoaded', actualizarEstadisticas);
+        document.body.addEventListener('htmx:afterSwap', actualizarEstadisticas);
+        document.body.addEventListener('htmx:afterRequest', actualizarEstadisticas);
+    </script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<form 
+    {% if accion == 'crear' %}
+        hx-post="{% url 'crear_tarea' %}"
+        hx-target="#lista-tareas"
+        hx-swap="afterbegin"
+    {% else %}
+        hx-put="{% url 'actualizar_tarea' tarea.id %}"
+        hx-target="#tarea-{{ tarea.id }}"
+        hx-swap="outerHTML"
+    {% endif %}
+    class="space-y-4">
+    {% csrf_token %}
+    <div class="space-y-2">
+        <label for="id_titulo" class="block text-sm font-medium text-gray-700">
+            <i class="fas fa-heading mr-2"></i>Título de la tarea *
+        </label>
+        {{ formulario.titulo }}
+        {% if formulario.titulo.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in formulario.titulo.errors %}
+                    <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+    <div class="space-y-2">
+        <label for="id_descripcion" class="block text-sm font-medium text-gray-700">
+            <i class="fas fa-align-left mr-2"></i>Descripción
+        </label>
+        {{ formulario.descripcion }}
+        {% if formulario.descripcion.errors %}
+            <div class="text-red-500 text-sm mt-1">
+                {% for error in formulario.descripcion.errors %}
+                    <i class="fas fa-exclamation-circle mr-1"></i>{{ error }}
+                {% endfor %}
+            </div>
+        {% endif %}
+        <p class="text-xs text-gray-500">{{ formulario.descripcion.help_text }}</p>
+    </div>
+    <div class="flex gap-3 pt-2">
+        <button type="submit" 
+                class="px-6 py-3 rounded-lg font-medium transition duration-200 {% if accion == 'crear' %}bg-green-500 hover:bg-green-600 text-white{% else %}bg-blue-500 hover:bg-blue-600 text-white{% endif %}">
+            <i class="fas {% if accion == 'crear' %}fa-plus{% else %}fa-save{% endif %} mr-2"></i>
+            {% if accion == 'crear' %}Crear Tarea{% else %}Guardar Cambios{% endif %}
+        </button>
+        
+        {% if accion == 'editar' %}
+            <button type="button" 
+                    onclick="toggleFormularioEdicion({{ tarea.id }})"
+                    class="px-6 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200">
+                <i class="fas fa-times mr-2"></i>Cancelar
+            </button>
+        {% else %}
+            <button type="reset" 
+                    class="px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition duration-200">
+                <i class="fas fa-eraser mr-2"></i>Limpiar
+            </button>
+        {% endif %}
+    </div>
+</form>

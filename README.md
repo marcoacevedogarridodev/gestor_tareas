@@ -25,3 +25,7 @@ python manage.py runserver
 
 * 8. Abrir en navegador
 * http://localhost:8000/tareas/
+
+
+* que mejoraria? integraria ia para una busqueda y clasificacion eficiente de tareas, agregaria la carga de archivos PDF, CSV o XLS, crearia un resumen de la tarea en si, con crearia el resumen de un archivo cargado.
+
